@@ -1,0 +1,32 @@
+name: blood_donation
+description: Blood Donation Application
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  flutter_native_splash: ^2.3.9
+  internet_connection_checker: ^1.0.0+1
+  shared_preferences: ^2.2.2
+  geolocator: ^9.0.2
+  geocoding: ^2.1.1
+  provider: ^6.1.1
+  dio: ^5.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
