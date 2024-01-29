@@ -1,8 +1,13 @@
+const mv = require('mv');
+const path = require('path');
 const crypto = require('crypto');
+const { formidable } = require('formidable');
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const ErrorResponse = require('../utils/errorResponse');
+const Email = require('../utils/email');
 const { isAuthenticated } = require('../middlewares/auth');
+const { bytesToMB } = require('../utils/functions');
 
 /**
  * @route POST /api/auth/login
@@ -54,7 +59,115 @@ exports.register = catchAsync(async (req, res) => {
     password
   });
 
+  await new Email(user, {}).sendWelcome();
   sendTokenResponse(user, 200, res);
+});
+
+/**
+ * @route POST /api/auth/update-details
+ * @desc Let a user update their details
+ * @secure true
+ */
+exports.updateDetails = catchAsync(async (req, res, next) => {
+  const { name, email, phone, bloodType, address } = req.body;
+  const user = req.user;
+
+  const fieldsToUpdate = {
+    name,
+    email,
+    phone,
+    bloodType,
+    address
+  };
+
+  await User.findByIdAndUpdate(user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Profile Details Updated Sucessfully'
+  });
+});
+
+/**
+ * @route POST /api/auth/update-password
+ * @desc Let a user update their password
+ * @secure true
+ */
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+  const user = await User.findById(req.user.id).select('+password');
+
+  // Check current password
+  if (!(await user.matchPassword(currentPassword))) {
+    return next(new ErrorResponse('Password is incorrect', 401));
+  }
+
+  // Check whether new password matches current password
+  if (await user.matchPassword(newPassword)) {
+    return next(
+      new ErrorResponse(
+        'This password is already in use, Kindly create another one',
+        401
+      )
+    );
+  }
+
+  user.password = newPassword;
+  await user.save();
+  sendTokenResponse(user, 200, res);
+});
+
+/**
+ * @route POST /api/auth/update-avatar
+ * @desc Let a user update their profile picture
+ * @secure true
+ */
+exports.updateAvatar = catchAsync(async (req, res, next) => {
+  const form = formidable();
+  const user = req.user;
+  const filename = `${user.name.replace(' ', '-')}.jpg`;
+
+  // Move The File From Temp To Avatar Dir
+  const moveFromTemp = async file => {
+    try {
+      const dest = path.join(__dirname, '../public/avatar', filename);
+      mv(file.avatar[0].filepath, dest, { mkdirp: true }, err => {});
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  // Parse form
+  form.parse(req, async (err, fields, file) => {
+    const size = bytesToMB(file.avatar[0].size);
+
+    if (size > 3) {
+      return next(
+        new ErrorResponse('File size cannot be greater than 3 MB', 401)
+      );
+    }
+
+    if (err) {
+      return next(err);
+    }
+
+    moveFromTemp(file);
+    const fieldsToUpdate = { avatar: filename };
+
+    // Update user in DB
+    await User.findByIdAndUpdate(user.id, fieldsToUpdate, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile Photo Updated Sucessfully'
+    });
+  });
 });
 
 /**
@@ -73,9 +186,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 
   const token = user.getResetPasswordToken();
+  await new Email(user, { otp: token }).sendPasswordReset();
 
   try {
-    res.status(200).json({ success: true, msg: 'Password reset request sent' });
+    res.status(200).json({
+      success: true,
+      message: 'Password reset OTP sent to your E-mail ID'
+    });
   } catch (err) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -87,13 +204,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 /**
- * @route POST /api/auth/reset-password/:token
+ * @route POST /api/auth/reset-password/
  * @desc Resets a user's password when requested with right reset token
  * @secure false
  */
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  const { token } = req.params;
-  const { password } = req.body;
+  const { token, password } = req.body;
 
   const resetPasswordToken = crypto
     .createHash('sha256')
@@ -108,9 +224,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   // Token expired or invalid token
   if (!user) {
-    return next(
-      new ErrorResponse('Invalid token maybe your time expired', 404)
-    );
+    return next(new ErrorResponse('Invalid or Expired OTP', 404));
   }
 
   // Update user with new password
@@ -118,7 +232,11 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
   await user.save();
-  res.status(200).json({ success: true });
+
+  res.status(200).json({
+    success: true,
+    message: 'Password has been changed, Use your new password to login'
+  });
 });
 
 /**
@@ -137,7 +255,7 @@ exports.getCurrentUser = catchAsync(async (req, res, next) => {
  * @secure true
  */
 exports.logout = catchAsync(async (req, res, next) => {
-  res.status(200).json({ success: true });
+  res.status(200).json({ success: true, message: 'Logout Sucessful' });
 });
 
 // Creates a JWT Token and returns it

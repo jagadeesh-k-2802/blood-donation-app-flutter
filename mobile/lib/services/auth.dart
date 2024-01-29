@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blood_donation/constants/constants.dart';
 import 'package:blood_donation/services/dio.dart';
@@ -11,7 +12,7 @@ class AuthService {
   }) async {
     try {
       final dio = await getDioClient();
-      const url = '$apiUrl/auth/login';
+      const url = '$apiUrl/api/v1/auth/login';
       var data = {'email': email, 'password': password};
 
       final response = await dio.post(url, data: data);
@@ -40,7 +41,7 @@ class AuthService {
   }) async {
     try {
       final dio = await getDioClient();
-      const url = '$apiUrl/auth/register';
+      const url = '$apiUrl/api/v1/auth/register';
 
       var data = {
         'name': name,
@@ -70,7 +71,7 @@ class AuthService {
   static Future<MessageResponse> logout() async {
     try {
       final dio = await getDioClient();
-      const url = '$apiUrl/auth/logout';
+      const url = '$apiUrl/api/v1/auth/logout';
 
       final response = await dio.get(url);
 
@@ -87,10 +88,140 @@ class AuthService {
     }
   }
 
+  static Future<MessageResponse> updateUserDetails({
+    required String name,
+    required String email,
+    required String address,
+    required String bloodType,
+    required String phone,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/auth/update-details';
+
+      var data = {
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'bloodType': bloodType,
+        'address': address,
+      };
+
+      final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      var messageResponse = MessageResponse.fromJson(response.data);
+      return messageResponse;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<TokenResponse> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/auth/update-password';
+
+      var data = {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      };
+
+      final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      var tokenResponse = TokenResponse.fromJson(response.data);
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(tokenKey, tokenResponse.token);
+      return tokenResponse;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> updateAvatar({
+    required String localFilePath,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/auth/update-avatar';
+      FormData data = FormData.fromMap({});
+
+      data = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(localFilePath),
+      });
+
+      final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      return MessageResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/auth/forgot-password';
+      var data = {'email': email};
+      final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      var messageResponse = MessageResponse.fromJson(response.data);
+      return messageResponse;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/auth/reset-password';
+      var data = {'token': token, 'password': password};
+      final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      var messageResponse = MessageResponse.fromJson(response.data);
+      return messageResponse;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<UserResponse> getMe() async {
     try {
       final dio = await getDioClient();
-      const url = '$apiUrl/auth/me';
+      const url = '$apiUrl/api/v1/auth/me';
       final response = await dio.get(url);
 
       if (response.statusCode != 200) {

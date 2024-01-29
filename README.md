@@ -1,4 +1,4 @@
-# Blood Donation App [Flutter, Node.js, Express, MongoDB]
+# Blood Donation App
 
 
 --- Work In Progress ---

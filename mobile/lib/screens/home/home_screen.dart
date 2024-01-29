@@ -1,4 +1,8 @@
+import 'package:blood_donation/models/auth.dart';
+import 'package:blood_donation/provider/global_state.dart';
+import 'package:blood_donation/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,20 +14,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    UserResponseData? user = context.read<GlobalState>().user;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text('Welcome, ${user?.name}'),
+        automaticallyImplyLeading: false,
       ),
-      body: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Home Screen... \n To Be Built',
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+      bottomNavigationBar: const BottomNavBar(currentIndex: 0),
+      body: null,
     );
   }
 }

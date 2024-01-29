@@ -128,7 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             padding:
                                 MaterialStatePropertyAll(EdgeInsets.all(0)),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/forgot-password');
+                          },
                           child: const Text(
                             'Forgot Password',
                             style: TextStyle(color: Colors.black54),

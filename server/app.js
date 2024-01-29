@@ -3,6 +3,8 @@ const path = require('path');
 const morgan = require('morgan');
 
 const authRoutes = require('./routes/auth');
+const bloodRequestRoutes = require('./routes/blood-request');
+const notificationRoutes = require('./routes/notification');
 const errorHandler = require('./middlewares/error');
 
 const app = express();
@@ -14,6 +16,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/blood-request', bloodRequestRoutes);
+app.use('/api/v1/notification', notificationRoutes);
 
 // Error Handler
 app.use(errorHandler);

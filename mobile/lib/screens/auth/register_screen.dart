@@ -1,20 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:blood_donation/services/auth.dart';
 import 'package:blood_donation/utils/functions.dart';
 import 'package:blood_donation/theme/theme.dart';
-
-List<String> bloodTypes = [
-  'A Positive (A+)',
-  'A Negative (A-)',
-  'B Positive (B+)',
-  'B Negative (B-)',
-  'O Positive (O+)',
-  'O Negative (O-)',
-  'AB Positive (AB+)',
-  'AB Negative (AB-)',
-];
+import 'package:blood_donation/constants/constants.dart';
 
 class RegisterScreen extends StatefulWidget {
   final VoidCallback togglePage;
@@ -35,6 +23,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool hidePassword = true;
 
   Future<void> sendRegisterRequest() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+
+      return;
+    }
+
     try {
       await AuthService.register(
         name: nameController.text,
@@ -57,64 +53,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  Future<void> getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        if (!mounted) return;
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return const Text('Please Enable Location Permission');
-          },
-        );
-
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      if (!mounted) return;
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return const Text('Please Enable Location Permission');
-        },
-      );
-
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
-
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
-
-    String geoCodeLoation = '';
-
-    if (placemarks.isNotEmpty) {
-      geoCodeLoation += '${placemarks[0].street} ';
-      geoCodeLoation += '${placemarks[0].subLocality} ';
-      geoCodeLoation += '${placemarks[0].locality} ';
-      geoCodeLoation += '${placemarks[0].postalCode} ';
-      geoCodeLoation += '${placemarks[0].country} ';
-    }
-
-    setState(() {
-      addressController.text = geoCodeLoation;
-    });
+  Future<void> fetchLocation() async {
+    addressController.text = 'Fetching Location...';
+    addressController.text = await getCurrentLocation(context) ?? '';
   }
 
   @override
@@ -225,11 +166,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         border: const OutlineInputBorder(),
                         labelText: 'Address',
                         suffixIcon: IconButton(
-                          onPressed: getCurrentLocation,
+                          onPressed: fetchLocation,
                           icon: const Icon(Icons.location_on),
                         ),
                       ),
-                      keyboardType: TextInputType.name,
+                      keyboardType: TextInputType.streetAddress,
                     ),
                     const SizedBox(height: 16.0),
                     TextFormField(
