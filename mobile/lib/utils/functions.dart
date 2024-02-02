@@ -40,7 +40,7 @@ Future<void> authNavigate(BuildContext context) async {
 /// getCurrentLocation
 /// * Fetches the current location of the user
 ///
-Future<String?> getCurrentLocation(BuildContext context) async {
+Future<(Position, String)?> getCurrentLocation(BuildContext context) async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
   LocationPermission permission = await Geolocator.checkPermission();
 
@@ -52,7 +52,7 @@ Future<String?> getCurrentLocation(BuildContext context) async {
     permission = await Geolocator.requestPermission();
 
     if (permission == LocationPermission.denied) {
-      if (!context.mounted) return '';
+      if (!context.mounted) return null;
 
       showDialog(
         context: context,
@@ -61,12 +61,12 @@ Future<String?> getCurrentLocation(BuildContext context) async {
         },
       );
 
-      return '';
+      return null;
     }
   }
 
   if (permission == LocationPermission.deniedForever) {
-    if (!context.mounted) return '';
+    if (!context.mounted) return null;
 
     showDialog(
       context: context,
@@ -75,7 +75,7 @@ Future<String?> getCurrentLocation(BuildContext context) async {
       },
     );
 
-    return '';
+    return null;
   }
 
   Position position = await Geolocator.getCurrentPosition();
@@ -95,5 +95,5 @@ Future<String?> getCurrentLocation(BuildContext context) async {
     geoCodeLoation += '${placemarks[0].country} ';
   }
 
-  return geoCodeLoation;
+  return (position, geoCodeLoation);
 }

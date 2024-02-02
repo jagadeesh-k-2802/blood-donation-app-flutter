@@ -24,11 +24,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   String selectedBloodType = bloodTypes.first;
+  List<double> coordinates = List.empty();
   Uint8List? imageBytes;
 
   Future<void> fetchLocation() async {
     addressController.text = 'Fetching Location...';
-    addressController.text = await getCurrentLocation(context) ?? '';
+    var location = await getCurrentLocation(context);
+    coordinates = [location?.$1.latitude ?? 0, location?.$1.longitude ?? 0];
+    addressController.text = location?.$2 ?? '';
   }
 
   Future<void> onAvatarChange() async {
@@ -84,6 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         name: nameController.text,
         email: emailController.text,
         address: addressController.text,
+        coordinates: coordinates,
         bloodType: selectedBloodType,
         phone: phoneController.text,
       );

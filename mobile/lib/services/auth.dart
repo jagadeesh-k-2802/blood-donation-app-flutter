@@ -36,6 +36,7 @@ class AuthService {
     required String email,
     required String password,
     required String address,
+    required List<double> coordinates,
     required String bloodType,
     required String phone,
   }) async {
@@ -49,6 +50,7 @@ class AuthService {
         'phone': phone,
         'bloodType': bloodType,
         'address': address,
+        'coordinates': coordinates,
         'password': password,
       };
 
@@ -92,6 +94,7 @@ class AuthService {
     required String name,
     required String email,
     required String address,
+    required List<double> coordinates,
     required String bloodType,
     required String phone,
   }) async {
@@ -105,6 +108,7 @@ class AuthService {
         'phone': phone,
         'bloodType': bloodType,
         'address': address,
+        'coordinates': coordinates,
       };
 
       final response = await dio.post(url, data: data);

@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   String selectedBloodType = bloodTypes.first;
+  List<double> coordinates = List.empty();
   bool hidePassword = true;
 
   Future<void> sendRegisterRequest() async {
@@ -39,6 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phone: phoneController.text,
         bloodType: selectedBloodType,
         address: addressController.text,
+        coordinates: coordinates,
       );
 
       if (mounted) {
@@ -55,7 +57,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> fetchLocation() async {
     addressController.text = 'Fetching Location...';
-    addressController.text = await getCurrentLocation(context) ?? '';
+    var location = await getCurrentLocation(context);
+    coordinates = [location?.$1.latitude ?? 0, location?.$1.longitude ?? 0];
+    addressController.text = location?.$2 ?? '';
   }
 
   @override

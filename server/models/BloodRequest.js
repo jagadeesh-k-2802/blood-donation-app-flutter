@@ -19,6 +19,16 @@ const BloodRequest = new mongoose.Schema(
       maxlength: 120,
       required: [true, 'Location is required']
     },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point']
+      },
+      coordinates: {
+        type: [Number],
+        index: '2dsphere'
+      },
+    },
     contactNumber: {
       type: String,
       maxlength: 120,
@@ -32,7 +42,7 @@ const BloodRequest = new mongoose.Schema(
     notes: {
       type: String,
       maxlength: 500,
-      default: '',
+      default: ''
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     acceptedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -41,4 +51,5 @@ const BloodRequest = new mongoose.Schema(
   { toJSON: { virtuals: true } }
 );
 
+BloodRequest.index({ locationCoordinates: '2dsphere' });
 module.exports = mongoose.model('BloodRequest', BloodRequest, 'blood-requests');

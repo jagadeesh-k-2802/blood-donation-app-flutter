@@ -20,10 +20,13 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
   TextEditingController unitsController = TextEditingController();
   TextEditingController notesController = TextEditingController();
   String selectedBloodType = bloodTypes.first;
+  List<double> coordinates = List.empty();
 
   Future<void> fetchLocation() async {
     locationController.text = 'Fetching Location...';
-    locationController.text = await getCurrentLocation(context) ?? '';
+    var location = await getCurrentLocation(context);
+    coordinates = [location?.$1.latitude ?? 0, location?.$1.longitude ?? 0];
+    locationController.text = location?.$2 ?? '';
   }
 
   Future<void> sendBloodRequest() async {
@@ -33,6 +36,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         age: ageController.text,
         bloodType: selectedBloodType,
         location: locationController.text,
+        coordinates: coordinates,
         contactNumber: contactController.text,
         unitsRequired: int.parse(unitsController.text),
         notes: notesController.text,
@@ -66,6 +70,8 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Add Time Until TextField
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Request Blood'),

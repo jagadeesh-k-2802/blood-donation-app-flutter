@@ -2,8 +2,8 @@ const BloodRequest = require('../models/BloodRequest');
 const catchAsync = require('../utils/catchAsync');
 
 /**
- * @route POST /api/blood-request
- * @desc Create a new blood request
+ * @route GET /api/blood-request
+ * @desc Get all blood requests paginated and filter by type
  * @secure true
  */
 exports.getBloodRequests = catchAsync(async (req, res, next) => {
@@ -20,6 +20,53 @@ exports.getBloodRequests = catchAsync(async (req, res, next) => {
 });
 
 /**
+ * @route GET /api/blood-request/nearby
+ * @desc Get blood requests that are nearby to user
+ * @secure true
+ */
+exports.getBloodRequestsNearby = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  const userCoordinates = user.locationCoordinates.coordinates;
+  const searchRadiusInKilometres = 1000 / 3963.2;
+  const limit = 30;
+
+  const bloodRequests = await BloodRequest.find({
+    locationCoordinates: {
+      $geoWithin: {
+        $centerSphere: [userCoordinates, searchRadiusInKilometres]
+      }
+    },
+    createdBy: { $ne: user.id }
+  }).limit(limit);
+
+  res.json({ success: true, data: bloodRequests });
+});
+
+/**
+ * @route POST /api/blood-request/stats
+ * @desc Get Stats about blood requests
+ * @secure true
+ */
+exports.getBloodRequestStats = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+
+  const userBloodRequestsCount = await BloodRequest.count({
+    createdBy: { $eq: userId }
+  });
+
+  const userBloodDonatedCount = await BloodRequest.count({
+    acceptedBy: { $eq: userId }
+  });
+
+  const data = {
+    totalRequests: userBloodRequestsCount,
+    totalDonated: userBloodDonatedCount
+  };
+
+  return res.json({ success: true, data });
+});
+
+/**
  * @route POST /api/blood-request
  * @desc Create a new blood request
  * @secure true
@@ -30,6 +77,7 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
     age,
     bloodType,
     location,
+    coordinates,
     contactNumber,
     unitsRequired,
     notes
@@ -42,6 +90,10 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
     age,
     bloodType,
     location,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: coordinates.reverse()
+    },
     contactNumber,
     unitsRequired,
     notes,

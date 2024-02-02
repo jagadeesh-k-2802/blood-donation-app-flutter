@@ -27,11 +27,44 @@ class BloodRequestService {
     }
   }
 
+  static Future<GetNearbyBloodRequestResponse> getNearbyBloodRequests() async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/blood-request/nearby';
+      final response = await dio.get(url);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+      return GetNearbyBloodRequestResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<GetBloodRequestStatsResponse> getBloodRequestStats() async {
+    try {
+      final dio = await getDioClient();
+      const url = '$apiUrl/api/v1/blood-request/stats';
+      final response = await dio.get(url);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+      return GetBloodRequestStatsResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<MessageResponse> createBloodRequest({
     required String patientName,
     required String age,
     required String bloodType,
     required String location,
+    required List<double> coordinates,
     required String contactNumber,
     required int unitsRequired,
     required String notes,
@@ -45,6 +78,7 @@ class BloodRequestService {
         'age': age,
         'bloodType': bloodType,
         'location': location,
+        'coordinates': coordinates,
         'contactNumber': contactNumber,
         'unitsRequired': unitsRequired,
         'notes': notes,

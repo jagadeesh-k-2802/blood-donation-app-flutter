@@ -38,6 +38,16 @@ const User = new mongoose.Schema(
       maxlength: 120,
       default: ''
     },
+    locationCoordinates: {
+      type: {
+        type: String,
+        enum: ['Point']
+      },
+      coordinates: {
+        type: [Number],
+        index: '2dsphere'
+      }
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     createdAt: { type: Date, default: Date.now }

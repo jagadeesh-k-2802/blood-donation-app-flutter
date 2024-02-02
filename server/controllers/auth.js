@@ -45,18 +45,20 @@ exports.login = catchAsync(async (req, res, next) => {
  * @secure false
  */
 exports.register = catchAsync(async (req, res) => {
-  const { name, email, phone, address, bloodType, password } = req.body;
   const avatar = `default-avatar.jpg`;
 
   const user = await User.create({
-    name,
+    name: req.body.name,
     avatar,
-    email,
-    avatar,
-    phone,
-    address,
-    bloodType,
-    password
+    email: req.body.email,
+    phone: req.body.phone,
+    address: req.body.address,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: req.body.coordinates.reverse()
+    },
+    bloodType: req.body.bloodType,
+    password: req.body.password
   });
 
   await new Email(user, {}).sendWelcome();
@@ -69,7 +71,7 @@ exports.register = catchAsync(async (req, res) => {
  * @secure true
  */
 exports.updateDetails = catchAsync(async (req, res, next) => {
-  const { name, email, phone, bloodType, address } = req.body;
+  const { name, email, phone, bloodType, address, coordinates } = req.body;
   const user = req.user;
 
   const fieldsToUpdate = {
@@ -77,7 +79,11 @@ exports.updateDetails = catchAsync(async (req, res, next) => {
     email,
     phone,
     bloodType,
-    address
+    address,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: coordinates.reverse()
+    }
   };
 
   await User.findByIdAndUpdate(user.id, fieldsToUpdate, {
