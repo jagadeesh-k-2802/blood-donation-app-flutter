@@ -62,22 +62,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         automaticallyImplyLeading: false,
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 3),
-      body: RefreshIndicator(
-        onRefresh: () => Future.sync(
-          () => pagingController.refresh(),
-        ),
-        child: PagedListView<int, NotificationItem>(
-          pagingController: pagingController,
-          builderDelegate: PagedChildBuilderDelegate<NotificationItem>(
-            itemBuilder: (context, item, index) => ListTile(
-              title: Text(item.title),
-              subtitle: Text(item.description),
-              trailing: Column(
-                children: [Text(Moment(item.createdAt).lll)],
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => Future.sync(
+            () => pagingController.refresh(),
+          ),
+          child: PagedListView<int, NotificationItem>(
+            pagingController: pagingController,
+            builderDelegate: PagedChildBuilderDelegate<NotificationItem>(
+              itemBuilder: (context, item, index) => ListTile(
+                title: Text(item.title),
+                subtitle: Text(item.description),
+                trailing: Column(
+                  children: [Text(item.createdAt.toMoment().lll)],
+                ),
+                onTap: () {
+                  // TODO: Navigate to right desination on Notification Tap
+                },
               ),
-              onTap: () {
-                // TODO: Navigate to right desination on Notification Tap
-              },
             ),
           ),
         ),

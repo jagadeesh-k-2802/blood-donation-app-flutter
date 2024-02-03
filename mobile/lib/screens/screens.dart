@@ -7,3 +7,5 @@ export '/screens/home/dashboard_screen.dart' hide PagingData;
 export '/screens/home/notifications_screen.dart' hide PagingData;
 export '/screens/home/profile_screen.dart';
 export '/screens/home/request_blood_screen.dart';
+export '/screens/home/request_detail_screen.dart';
+export '/screens/home/request_edit_screen.dart';

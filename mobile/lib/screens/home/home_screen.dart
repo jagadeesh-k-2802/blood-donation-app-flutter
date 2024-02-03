@@ -1,6 +1,7 @@
 import 'package:blood_donation/models/auth.dart';
 import 'package:blood_donation/models/blood_request.dart';
 import 'package:blood_donation/provider/global_state.dart';
+import 'package:blood_donation/screens/home/request_detail_screen.dart';
 import 'package:blood_donation/services/blood_request.dart';
 import 'package:blood_donation/widgets/bottom_nav_bar.dart';
 import 'package:blood_donation/widgets/info_card.dart';
@@ -78,14 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
               horizontal: 16.0,
               vertical: 8.0,
             ),
-            child: Row(children: [
-              Text(
-                'Blood Requests Nearby',
-                style: textTheme.titleLarge,
-              ),
-              const SizedBox(width: 8.0),
-              const Icon(Icons.location_on_outlined),
-            ]),
+            child: Row(
+              children: [
+                Text(
+                  'Blood Requests Nearby',
+                  style: textTheme.titleLarge,
+                ),
+                const SizedBox(width: 8.0),
+                const Icon(Icons.location_on_outlined),
+              ],
+            ),
           );
         }
 
@@ -103,10 +106,14 @@ class _HomeScreenState extends State<HomeScreen> {
             overflow: TextOverflow.ellipsis,
           ),
           trailing: Column(
-            children: [Text(Moment(item.createdAt).lll)],
+            children: [Text(item.timeUntil.toMoment().lll)],
           ),
           onTap: () {
-            // TODO: Navigate to BloodRequest detail screen
+            Navigator.pushNamed(
+              context,
+              '/request-detail',
+              arguments: RequestDetailScreenArgs(id: item.id),
+            );
           },
         );
       },
@@ -124,53 +131,58 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[];
-        },
-        body: ListView(
-          children: [
-            buildHomeStats(user?.bloodType),
-            FutureBuilder(
-              future: BloodRequestService.getNearbyBloodRequests(),
-              builder: ((context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Error Loading Data'),
-                  );
-                }
+      body: SafeArea(
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[];
+          },
+          body: RefreshIndicator(
+            onRefresh: () async => await fetchData(),
+            child: ListView(
+              children: [
+                buildHomeStats(user?.bloodType),
+                FutureBuilder(
+                  future: BloodRequestService.getNearbyBloodRequests(),
+                  builder: ((context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('Error Loading Data'),
+                      );
+                    }
 
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  var data = snapshot.data?.data;
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else {
+                      var data = snapshot.data?.data;
 
-                  if (data?.isEmpty == true) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 150),
-                          const Icon(Icons.info_outline, size: 64),
-                          const SizedBox(height: 8),
-                          Text(
-                            'No Nearby Blood Requests',
-                            style: textTheme.bodyLarge,
+                      if (data?.isEmpty == true) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 150),
+                              const Icon(Icons.info_outline, size: 64),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No Nearby Blood Requests',
+                                style: textTheme.bodyLarge,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  }
+                        );
+                      }
 
-                  return bloodRequestsList(data);
-                }
-              }),
-            )
-          ],
+                      return bloodRequestsList(data);
+                    }
+                  }),
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );

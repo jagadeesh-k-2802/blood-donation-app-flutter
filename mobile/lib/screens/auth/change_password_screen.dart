@@ -52,78 +52,80 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       appBar: AppBar(
         title: const Text('Change Password'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultPagePadding),
-          child: Column(
-            children: [
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: currentPasswordController,
-                obscureText: hidePassword,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: 'Current Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      hidePassword ? Icons.visibility : Icons.visibility_off,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: defaultPagePadding),
+            child: Column(
+              children: [
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: currentPasswordController,
+                  obscureText: hidePassword,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Current Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        hidePassword ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hidePassword = !hidePassword;
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      setState(() {
-                        hidePassword = !hidePassword;
-                      });
-                    },
                   ),
+                  keyboardType: TextInputType.visiblePassword,
                 ),
-                keyboardType: TextInputType.visiblePassword,
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: passwordController,
-                obscureText: hidePassword,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: 'New Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      hidePassword ? Icons.visibility : Icons.visibility_off,
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: hidePassword,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'New Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        hidePassword ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hidePassword = !hidePassword;
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      setState(() {
-                        hidePassword = !hidePassword;
-                      });
-                    },
                   ),
+                  keyboardType: TextInputType.visiblePassword,
                 ),
-                keyboardType: TextInputType.visiblePassword,
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: confirmPasswordController,
-                obscureText: hidePassword,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: 'Confirm New Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      hidePassword ? Icons.visibility : Icons.visibility_off,
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: confirmPasswordController,
+                  obscureText: hidePassword,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Confirm New Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        hidePassword ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          hidePassword = !hidePassword;
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      setState(() {
-                        hidePassword = !hidePassword;
-                      });
-                    },
                   ),
+                  keyboardType: TextInputType.visiblePassword,
                 ),
-                keyboardType: TextInputType.visiblePassword,
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton.icon(
-                onPressed: updatePassword,
-                icon: const Icon(Icons.done),
-                label: const Text('Change Password'),
-              )
-            ],
+                const SizedBox(height: 16.0),
+                ElevatedButton.icon(
+                  onPressed: updatePassword,
+                  icon: const Icon(Icons.done),
+                  label: const Text('Change Password'),
+                )
+              ],
+            ),
           ),
         ),
       ),

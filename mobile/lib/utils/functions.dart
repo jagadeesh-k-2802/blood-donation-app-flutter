@@ -7,6 +7,16 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:blood_donation/provider/global_state.dart';
 import 'package:blood_donation/services/auth.dart';
 
+/// capitalize
+/// * Capitalize first letter of word
+///
+String titleCase(String arg) {
+  return arg[0].toUpperCase() + arg.substring(1);
+}
+
+/// hasInternetConnection
+/// * Check whether device has active internet connection
+///
 Future<bool> hasInternetConnection() async {
   return await InternetConnectionChecker().hasConnection;
 }

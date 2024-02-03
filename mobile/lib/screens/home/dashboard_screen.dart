@@ -1,6 +1,8 @@
 import 'package:blood_donation/models/auth.dart';
 import 'package:blood_donation/provider/global_state.dart';
+import 'package:blood_donation/screens/home/request_detail_screen.dart';
 import 'package:blood_donation/services/blood_request.dart';
+import 'package:blood_donation/utils/functions.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:blood_donation/models/blood_request.dart';
 import 'package:blood_donation/widgets/bottom_nav_bar.dart';
@@ -56,12 +58,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  MaterialColor getColorForStatus(String status) {
+    switch (status) {
+      case 'active':
+        return Colors.red;
+      case 'pending':
+        return Colors.yellow;
+      case 'accepted':
+        return Colors.green;
+      default:
+        return Colors.red;
+    }
+  }
+
+  Widget buildListItem(BloodRequestItem item) {
+    return ListTile(
+      title: Text(item.patientName),
+      subtitle: Text(
+        item.location,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Column(
+        children: [
+          Text(
+            titleCase(item.status),
+            style: TextStyle(color: getColorForStatus(item.status)),
+          ),
+        ],
+      ),
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/request-detail',
+          arguments: RequestDetailScreenArgs(id: item.id),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     UserResponseData? user = context.read<GlobalState>().user;
-
-    // TODO: Show status of the request
-    // TODO: Navigate to Detail Screen on List Item Tap
 
     return DefaultTabController(
       initialIndex: 0,
@@ -79,48 +117,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         bottomNavigationBar: const BottomNavBar(currentIndex: 1),
-        body: TabBarView(
-          children: <Widget>[
-            RefreshIndicator(
-              onRefresh: () => Future.sync(
-                () => pagingController.refresh(),
-              ),
-              child: PagedListView<int, BloodRequestItem>(
-                pagingController: pagingController,
-                builderDelegate: PagedChildBuilderDelegate<BloodRequestItem>(
-                  itemBuilder: (context, item, index) {
-                    if (item.createdBy != user?.id) {
-                      return Container();
-                    }
-
-                    return ListTile(
-                      title: Text(item.patientName),
-                      subtitle: Text(item.location),
-                    );
-                  },
+        body: SafeArea(
+          child: TabBarView(
+            children: <Widget>[
+              RefreshIndicator(
+                onRefresh: () => Future.sync(
+                  () => pagingController.refresh(),
+                ),
+                child: PagedListView<int, BloodRequestItem>(
+                  pagingController: pagingController,
+                  builderDelegate: PagedChildBuilderDelegate<BloodRequestItem>(
+                    itemBuilder: (context, item, index) {
+                      return item.createdBy != user?.id
+                          ? Container()
+                          : buildListItem(item);
+                    },
+                  ),
                 ),
               ),
-            ),
-            RefreshIndicator(
-              onRefresh: () => Future.sync(
-                () => pagingController.refresh(),
+              RefreshIndicator(
+                onRefresh: () => Future.sync(
+                  () => pagingController.refresh(),
+                ),
+                child: PagedListView<int, BloodRequestItem>(
+                  pagingController: pagingController,
+                  builderDelegate: PagedChildBuilderDelegate<BloodRequestItem>(
+                      itemBuilder: (context, item, index) {
+                    return item.acceptedBy != user?.id
+                        ? Container()
+                        : buildListItem(item);
+                  }),
+                ),
               ),
-              child: PagedListView<int, BloodRequestItem>(
-                pagingController: pagingController,
-                builderDelegate: PagedChildBuilderDelegate<BloodRequestItem>(
-                    itemBuilder: (context, item, index) {
-                  if (item.acceptedBy != user?.id) {
-                    return Container();
-                  }
-
-                  return ListTile(
-                    title: Text(item.patientName),
-                    subtitle: Text(item.location),
-                  );
-                }),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

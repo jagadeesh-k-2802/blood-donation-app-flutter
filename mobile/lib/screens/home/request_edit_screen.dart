@@ -1,20 +1,24 @@
-import 'package:blood_donation/screens/home/request_detail_screen.dart';
-import 'package:blood_donation/services/blood_request.dart';
 import 'package:flutter/material.dart';
-import 'package:blood_donation/widgets/bottom_nav_bar.dart';
+import 'package:moment_dart/moment_dart.dart';
+import 'package:blood_donation/models/blood_request.dart';
+import 'package:blood_donation/services/blood_request.dart';
 import 'package:blood_donation/constants/constants.dart';
 import 'package:blood_donation/theme/theme.dart';
 import 'package:blood_donation/utils/functions.dart';
-import 'package:moment_dart/moment_dart.dart';
 
-class RequestBloodScreen extends StatefulWidget {
-  const RequestBloodScreen({super.key});
-
-  @override
-  State<RequestBloodScreen> createState() => _RequestBloodScreenState();
+class RequestEditScreenArgs {
+  final GetBloodRequestResponseData data;
+  RequestEditScreenArgs({required this.data});
 }
 
-class _RequestBloodScreenState extends State<RequestBloodScreen> {
+class RequestEditScreen extends StatefulWidget {
+  const RequestEditScreen({super.key});
+
+  @override
+  State<RequestEditScreen> createState() => _RequestEditScreenState();
+}
+
+class _RequestEditScreenState extends State<RequestEditScreen> {
   TextEditingController patientNameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   TextEditingController locationController = TextEditingController();
@@ -25,6 +29,27 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
   String selectedBloodType = bloodTypes.first;
   List<double> coordinates = List.empty();
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final settings = ModalRoute.of(context)!.settings;
+      final args = settings.arguments as RequestEditScreenArgs;
+
+      setState(() {
+        patientNameController.text = args.data.patientName;
+        ageController.text = args.data.age;
+        locationController.text = args.data.location;
+        contactController.text = args.data.contactNumber;
+        unitsController.text = args.data.unitsRequired.toString();
+        notesController.text = args.data.notes ?? '';
+        selectedBloodType = args.data.bloodType;
+        timeUntilController.text = args.data.timeUntil.toMoment().LLL;
+      });
+    });
+  }
+
   Future<void> fetchLocation() async {
     locationController.text = 'Fetching Location...';
     var location = await getCurrentLocation(context);
@@ -32,9 +57,13 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
     locationController.text = location?.$2 ?? '';
   }
 
-  Future<void> sendBloodRequest() async {
+  Future<void> updateBloodRequest() async {
+    final settings = ModalRoute.of(context)!.settings;
+    final args = settings.arguments as RequestEditScreenArgs;
+
     try {
-      var res = await BloodRequestService.createBloodRequest(
+      var res = await BloodRequestService.updateBloodRequest(
+        id: args.data.id,
         patientName: patientNameController.text,
         age: ageController.text,
         bloodType: selectedBloodType,
@@ -49,7 +78,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request Created Sucessfully')),
+        SnackBar(content: Text(res.message)),
       );
 
       // Clear All Values
@@ -62,11 +91,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         notesController.text = '';
       });
 
-      Navigator.pushNamed(
-        context,
-        '/request-detail',
-        arguments: RequestDetailScreenArgs(id: res.data.id),
-      );
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
 
@@ -107,10 +132,9 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Request Blood'),
-        automaticallyImplyLeading: false,
+        title: const Text('Edit Blood Request'),
+        automaticallyImplyLeading: true,
       ),
-      bottomNavigationBar: const BottomNavBar(currentIndex: 2),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -211,9 +235,9 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
                 ),
                 const SizedBox(height: 24.0),
                 ElevatedButton.icon(
-                  onPressed: sendBloodRequest,
-                  icon: const Icon(Icons.bloodtype),
-                  label: const Text('Request Blood'),
+                  onPressed: updateBloodRequest,
+                  icon: const Icon(Icons.done),
+                  label: const Text('Update Details'),
                 ),
                 const SizedBox(height: 8.0),
               ],

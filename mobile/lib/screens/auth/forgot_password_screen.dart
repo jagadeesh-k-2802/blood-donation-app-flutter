@@ -66,72 +66,74 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Forgot Password')),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: defaultPagePadding),
-        child: Column(
-          children: [
-            const SizedBox(height: 32.0),
-            TextFormField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: defaultPagePadding),
+          child: Column(
+            children: [
+              const SizedBox(height: 32.0),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Email',
+                ),
+                keyboardType: TextInputType.emailAddress,
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16.0),
-            Text(
-              'Enter your registered Email ID and submit you will recieve an mail with OTP from us.',
-              style: textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 16.0),
-            Visibility(
-              visible: showResetTextField,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: tokenController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'OTP',
-                      hintText: 'Enter OTP',
-                    ),
-                    keyboardType: TextInputType.text,
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: hidePassword,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: 'Password',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          hidePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            hidePassword = !hidePassword;
-                          });
-                        },
+              const SizedBox(height: 16.0),
+              Text(
+                'Enter your registered Email ID and submit you will recieve an mail with OTP from us.',
+                style: textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16.0),
+              Visibility(
+                visible: showResetTextField,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: tokenController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'OTP',
+                        hintText: 'Enter OTP',
                       ),
+                      keyboardType: TextInputType.text,
                     ),
-                    keyboardType: TextInputType.visiblePassword,
-                  ),
-                  const SizedBox(height: 16.0),
-                ],
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: hidePassword,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: 'Password',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            hidePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              hidePassword = !hidePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      keyboardType: TextInputType.visiblePassword,
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
+                ),
               ),
-            ),
-            ElevatedButton.icon(
-              onPressed: showResetTextField
-                  ? resetPassword
-                  : sendForgotPasswordRequest,
-              icon: const Icon(Icons.done),
-              label: Text(showResetTextField ? 'Reset Password' : 'Submit'),
-            )
-          ],
+              ElevatedButton.icon(
+                onPressed: showResetTextField
+                    ? resetPassword
+                    : sendForgotPasswordRequest,
+                icon: const Icon(Icons.done),
+                label: Text(showResetTextField ? 'Reset Password' : 'Submit'),
+              )
+            ],
+          ),
         ),
       ),
     );

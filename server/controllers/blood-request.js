@@ -20,6 +20,21 @@ exports.getBloodRequests = catchAsync(async (req, res, next) => {
 });
 
 /**
+ * @route GET /api/blood-request/:id
+ * @desc Get one blood request by its ID
+ * @secure true
+ */
+exports.getBloodRequest = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  const request = await BloodRequest.findById(id)
+    .populate('createdBy')
+    .populate('acceptedBy');
+
+  res.json({ success: true, data: request });
+});
+
+/**
  * @route GET /api/blood-request/nearby
  * @desc Get blood requests that are nearby to user
  * @secure true
@@ -27,7 +42,7 @@ exports.getBloodRequests = catchAsync(async (req, res, next) => {
 exports.getBloodRequestsNearby = catchAsync(async (req, res, next) => {
   const user = req.user;
   const userCoordinates = user.locationCoordinates.coordinates;
-  const searchRadiusInKilometres = 1000 / 3963.2;
+  const searchRadiusInKilometres = 1500 / 3963.2;
   const limit = 30;
 
   const bloodRequests = await BloodRequest.find({
@@ -36,6 +51,7 @@ exports.getBloodRequestsNearby = catchAsync(async (req, res, next) => {
         $centerSphere: [userCoordinates, searchRadiusInKilometres]
       }
     },
+    timeUntil: { $gte: Date.now() },
     createdBy: { $ne: user.id }
   }).limit(limit);
 
@@ -80,12 +96,13 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
     coordinates,
     contactNumber,
     unitsRequired,
+    timeUntil,
     notes
   } = req.body;
 
   const user = req.user;
 
-  await BloodRequest.create({
+  const bloodRequest = await BloodRequest.create({
     patientName,
     age,
     bloodType,
@@ -96,12 +113,57 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
     },
     contactNumber,
     unitsRequired,
+    timeUntil: new Date(timeUntil),
     notes,
-    createdBy: user
+    createdBy: user.id
   });
 
   res.status(200).json({
     success: true,
-    message: 'Request Submitted Successfully.'
+    data: { id: bloodRequest.id }
+  });
+});
+
+/**
+ * @route PUT /api/blood-request/:id
+ * @desc Update a blood request
+ * @secure true
+ */
+exports.updateBloodRequest = catchAsync(async (req, res, next) => {
+  const {
+    patientName,
+    age,
+    bloodType,
+    location,
+    coordinates,
+    contactNumber,
+    unitsRequired,
+    timeUntil,
+    notes
+  } = req.body;
+
+  const { id } = req.params;
+
+  await BloodRequest.updateOne(
+    { id: id },
+    {
+      patientName,
+      age,
+      bloodType,
+      location,
+      locationCoordinates: {
+        type: 'Point',
+        coordinates: coordinates.reverse()
+      },
+      contactNumber,
+      unitsRequired,
+      timeUntil: new Date(timeUntil),
+      notes
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: 'Request Updated Successfully.'
   });
 });

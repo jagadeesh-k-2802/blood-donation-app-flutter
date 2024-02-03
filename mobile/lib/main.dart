@@ -33,6 +33,8 @@ class App extends StatelessWidget {
         '/home': (_) => const HomeScreen(),
         '/dashboard': (_) => const DashboardScreen(),
         '/request-blood': (_) => const RequestBloodScreen(),
+        '/request-detail': (_) => const RequestDetailScreen(),
+        '/request-edit': (_) => const RequestEditScreen(),
         '/notifications': (_) => const NotificationsScreen(),
         '/profile': (_) => const ProfileScreen(),
         '/change-password': (_) => const ChangePasswordScreen(),

@@ -14,12 +14,16 @@ const BloodRequest = new mongoose.Schema(
       type: String,
       required: [true, 'Blood Type is required']
     },
+    status: {
+      type: String,
+      enum: ['active', 'pending', 'accepted']
+    },
     location: {
       type: String,
       maxlength: 120,
       required: [true, 'Location is required']
     },
-    location: {
+    locationCoordinates: {
       type: {
         type: String,
         enum: ['Point']
@@ -27,7 +31,7 @@ const BloodRequest = new mongoose.Schema(
       coordinates: {
         type: [Number],
         index: '2dsphere'
-      },
+      }
     },
     contactNumber: {
       type: String,
@@ -38,6 +42,10 @@ const BloodRequest = new mongoose.Schema(
       type: Number,
       max: [10, 'Maximum units can be only 10'],
       required: [true, 'Contact Number is required']
+    },
+    timeUntil: {
+      type: Date,
+      required: [true, 'Please select time until']
     },
     notes: {
       type: String,

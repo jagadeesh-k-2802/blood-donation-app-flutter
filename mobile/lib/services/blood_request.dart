@@ -27,6 +27,25 @@ class BloodRequestService {
     }
   }
 
+  static Future<GetBloodRequestResponse> getBloodRequest({
+    required String id,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/$id';
+      final response = await dio.get(url);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      return GetBloodRequestResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<GetNearbyBloodRequestResponse> getNearbyBloodRequests() async {
     try {
       final dio = await getDioClient();
@@ -59,7 +78,7 @@ class BloodRequestService {
     }
   }
 
-  static Future<MessageResponse> createBloodRequest({
+  static Future<CreateBloodRequestResponse> createBloodRequest({
     required String patientName,
     required String age,
     required String bloodType,
@@ -67,6 +86,7 @@ class BloodRequestService {
     required List<double> coordinates,
     required String contactNumber,
     required int unitsRequired,
+    required String timeUntil,
     required String notes,
   }) async {
     try {
@@ -81,10 +101,52 @@ class BloodRequestService {
         'coordinates': coordinates,
         'contactNumber': contactNumber,
         'unitsRequired': unitsRequired,
+        'timeUntil': timeUntil,
         'notes': notes,
       };
 
       final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      return CreateBloodRequestResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> updateBloodRequest({
+    required String id,
+    required String patientName,
+    required String age,
+    required String bloodType,
+    required String location,
+    required List<double> coordinates,
+    required String contactNumber,
+    required int unitsRequired,
+    required String timeUntil,
+    required String notes,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/$id';
+
+      var data = {
+        'patientName': patientName,
+        'age': age,
+        'bloodType': bloodType,
+        'location': location,
+        'coordinates': coordinates,
+        'contactNumber': contactNumber,
+        'unitsRequired': unitsRequired,
+        'timeUntil': timeUntil,
+        'notes': notes,
+      };
+
+      final response = await dio.put(url, data: data);
 
       if (response.statusCode != 200) {
         var errorResponse = ErrorResponse.fromJson(response.data);

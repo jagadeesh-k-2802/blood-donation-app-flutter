@@ -179,117 +179,119 @@ class _ProfileScreenState extends State<ProfileScreen> {
         automaticallyImplyLeading: false,
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 4),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: onAvatarChange,
-                  child: SizedBox(
-                    height: 150,
-                    width: 150,
-                    child: CircleAvatar(
-                      radius: 100,
-                      child: ClipOval(
-                        child: imageBytes == null
-                            ? Image.network('$apiUrl/avatar/${user?.avatar}')
-                            : Image.memory(imageBytes!),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: defaultPagePadding,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 32.0),
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Name',
-                    ),
-                    keyboardType: TextInputType.name,
-                  ),
-                  const SizedBox(height: 16.0),
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Blood Group',
-                    ),
-                    value: selectedBloodType,
-                    icon: const Icon(Icons.arrow_downward),
-                    elevation: 16,
-                    onChanged: (String? value) {
-                      setState(() {
-                        selectedBloodType = value!;
-                      });
-                    },
-                    items: bloodTypes.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Email',
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: phoneController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Phone',
-                    ),
-                    keyboardType: TextInputType.phone,
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextFormField(
-                    controller: addressController,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: 'Address',
-                      suffixIcon: IconButton(
-                        onPressed: fetchLocation,
-                        icon: const Icon(Icons.location_on),
+                  GestureDetector(
+                    onTap: onAvatarChange,
+                    child: SizedBox(
+                      height: 150,
+                      width: 150,
+                      child: CircleAvatar(
+                        radius: 100,
+                        child: ClipOval(
+                          child: imageBytes == null
+                              ? Image.network('$apiUrl/avatar/${user?.avatar}')
+                              : Image.memory(imageBytes!),
+                        ),
                       ),
                     ),
-                    keyboardType: TextInputType.streetAddress,
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton.icon(
-                    onPressed: updateUserDetails,
-                    icon: const Icon(Icons.done),
-                    label: const Text('Update Details'),
-                  ),
-                  const SizedBox(height: 4.0),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/change-password');
-                    },
-                    icon: const Icon(Icons.key),
-                    label: const Text('Change Password'),
                   ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: defaultPagePadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 32.0),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Name',
+                      ),
+                      keyboardType: TextInputType.name,
+                    ),
+                    const SizedBox(height: 16.0),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Blood Group',
+                      ),
+                      value: selectedBloodType,
+                      icon: const Icon(Icons.arrow_downward),
+                      elevation: 16,
+                      onChanged: (String? value) {
+                        setState(() {
+                          selectedBloodType = value!;
+                        });
+                      },
+                      items: bloodTypes.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Email',
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Phone',
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: addressController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: 'Address',
+                        suffixIcon: IconButton(
+                          onPressed: fetchLocation,
+                          icon: const Icon(Icons.location_on),
+                        ),
+                      ),
+                      keyboardType: TextInputType.streetAddress,
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton.icon(
+                      onPressed: updateUserDetails,
+                      icon: const Icon(Icons.done),
+                      label: const Text('Update Details'),
+                    ),
+                    const SizedBox(height: 4.0),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/change-password');
+                      },
+                      icon: const Icon(Icons.key),
+                      label: const Text('Change Password'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
