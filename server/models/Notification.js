@@ -17,11 +17,21 @@ const Notification = new mongoose.Schema(
     },
     notificationType: {
       type: String,
-      enum: ['message', 'donation-request', 'donation-accepted'],
+      enum: [
+        'message',
+        'donation-request',
+        'donation-accepted',
+        'donation-completed',
+        'nearby-donation-request'
+      ],
       default: 'message'
     },
-    data: {
+    itemId: {
       type: String
+    },
+    profileId: {
+      type: String,
+      default: ''
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now }

@@ -270,18 +270,21 @@ class GetBloodRequestStatsResponse {
 }
 
 class GetBloodRequestStatsResponseData {
-  int totalRequests;
-  int totalDonated;
+  String totalRequests;
+  String totalDonated;
+  String averageRating;
 
   GetBloodRequestStatsResponseData({
     required this.totalRequests,
     required this.totalDonated,
+    required this.averageRating,
   });
 
   factory GetBloodRequestStatsResponseData.fromJson(Map<String, dynamic> json) {
     return GetBloodRequestStatsResponseData(
-      totalRequests: json['totalRequests'],
-      totalDonated: json['totalDonated'],
+      totalRequests: json['totalRequests'].toString(),
+      totalDonated: json['totalDonated'].toString(),
+      averageRating: json['averageRating'].toString(),
     );
   }
 }

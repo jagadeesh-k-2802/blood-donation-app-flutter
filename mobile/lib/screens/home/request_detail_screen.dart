@@ -1,5 +1,10 @@
-import 'package:blood_donation/utils/functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:blood_donation/utils/functions.dart';
 import 'package:blood_donation/constants/constants.dart';
 import 'package:blood_donation/models/auth.dart';
 import 'package:blood_donation/provider/global_state.dart';
@@ -7,11 +12,6 @@ import 'package:blood_donation/screens/screens.dart';
 import 'package:blood_donation/theme/theme.dart';
 import 'package:blood_donation/models/blood_request.dart';
 import 'package:blood_donation/services/blood_request.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class RequestDetailScreenArgs {
   final String id;
@@ -142,7 +142,12 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [Center(child: CircularProgressIndicator())],
+      children: [
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Center(child: CircularProgressIndicator()),
+        )
+      ],
     );
   }
 
@@ -206,6 +211,34 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         ),
         const SizedBox(height: 16.0),
         Visibility(
+          visible: isOwner && data?.status == 'completed',
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/public-profile',
+                    arguments: PublicProfileScreenArgs(
+                      id: data?.acceptedBy?.id ?? '',
+                    ),
+                  );
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      'Message: Your request has been succesfully served by ${data?.acceptedBy?.name}',
+                      style: textTheme.bodyLarge,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        ),
+        Visibility(
           visible: isDonationCompleted,
           child: Column(
             children: [
@@ -223,7 +256,35 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           ),
         ),
         Visibility(
-          visible: isDonationAccepted,
+          visible: isOwner && data?.status == 'accepted',
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/public-profile',
+                    arguments: PublicProfileScreenArgs(
+                      id: data?.acceptedBy?.id ?? '',
+                    ),
+                  );
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      'Message: Your request has been accepted by Jagadeesh. contact them by tapping this message.',
+                      style: textTheme.bodyLarge,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        ),
+        Visibility(
+          visible: isDonationAccepted && !isOwner,
           child: Column(
             children: [
               Card(
@@ -334,7 +395,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           ),
         ),
         Visibility(
-          visible: isDonationAccepted,
+          visible: isDonationAccepted && !isOwner,
           child: ElevatedButton.icon(
             onPressed: requestProcessing ? null : markRequestAsCompleted,
             icon: const Icon(Icons.done),
@@ -344,7 +405,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           ),
         ),
         Visibility(
-          visible: isOwner,
+          visible: isOwner && data?.status != 'completed',
           child: ElevatedButton.icon(
             onPressed: deleteBloodRequest,
             icon: const Icon(Icons.delete),

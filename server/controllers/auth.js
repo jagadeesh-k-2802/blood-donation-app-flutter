@@ -74,17 +74,23 @@ exports.updateDetails = catchAsync(async (req, res, next) => {
   const { name, email, phone, bloodType, address, coordinates } = req.body;
   const user = req.user;
 
-  const fieldsToUpdate = {
+  let fieldsToUpdate = {
     name,
     email,
     phone,
     bloodType,
-    address,
-    locationCoordinates: {
-      type: 'Point',
-      coordinates: coordinates.reverse()
-    }
+    address
   };
+
+  if (coordinates.length > 0) {
+    fieldsToUpdate = {
+      ...fieldsToUpdate,
+      locationCoordinates: {
+        type: 'Point',
+        coordinates: coordinates.reverse()
+      }
+    };
+  }
 
   await User.findByIdAndUpdate(user.id, fieldsToUpdate, {
     new: true,

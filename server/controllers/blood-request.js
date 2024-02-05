@@ -1,5 +1,8 @@
+const mongoose = require('mongoose');
 const BloodRequest = require('../models/BloodRequest');
+const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Rating = require('../models/Rating');
 const catchAsync = require('../utils/catchAsync');
 const ErrorResponse = require('../utils/errorResponse');
 
@@ -29,11 +32,15 @@ exports.getBloodRequests = catchAsync(async (req, res, next) => {
 exports.getBloodRequest = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const request = await BloodRequest.findById(id)
+  const bloodRequest = await BloodRequest.findById(id)
     .populate('createdBy')
     .populate('acceptedBy');
 
-  res.status(200).json({ success: true, data: request });
+  if (!bloodRequest) {
+    return next(new ErrorResponse('Blood request not found', 404));
+  }
+
+  res.status(200).json({ success: true, data: bloodRequest });
 });
 
 /**
@@ -44,8 +51,8 @@ exports.getBloodRequest = catchAsync(async (req, res, next) => {
 exports.getBloodRequestsNearby = catchAsync(async (req, res, next) => {
   const user = req.user;
   const userCoordinates = user.locationCoordinates.coordinates;
-  const searchRadiusInKilometres = 100 / 6378.1;
-  const limit = 30;
+  const searchRadiusInKilometres = 200 / 6378.1;
+  const limit = 50;
 
   const bloodRequests = await BloodRequest.find({
     locationCoordinates: {
@@ -78,9 +85,22 @@ exports.getBloodRequestStats = catchAsync(async (req, res, next) => {
     status: { $eq: 'completed' }
   });
 
+  const averageRating = await Rating.aggregate([
+    {
+      $match: { user: mongoose.Types.ObjectId(userId) }
+    },
+    {
+      $group: {
+        _id: null,
+        averageRating: { $avg: '$rating' }
+      }
+    }
+  ]);
+
   const data = {
     totalRequests: userBloodRequestsCount,
-    totalDonated: userBloodDonatedCount
+    totalDonated: userBloodDonatedCount,
+    averageRating: averageRating.length > 0 ? averageRating[0].averageRating : 0
   };
 
   return res.status(200).json({ success: true, data });
@@ -116,7 +136,8 @@ exports.donateRequest = catchAsync(async (req, res, next) => {
     title: 'New Donate Request',
     description: `${user.name} has accepted to donate for ${bloodRequest.patientName}`,
     notificationType: 'donation-request',
-    data: bloodRequest.id,
+    itemId: bloodRequest.id,
+    profileId: user.id,
     user: bloodRequest.createdBy
   });
 
@@ -165,7 +186,9 @@ exports.completeRequest = catchAsync(async (req, res, next) => {
 
   await Notification.create({
     title: 'Donation Completed Successfully',
-    description: `your request for ${bloodRequest.patientName} has been sucessfully served.`,
+    notificationType: 'donation-completed',
+    description: `your request for ${bloodRequest.patientName} has been sucessfully served by ${user.name}`,
+    itemId: bloodRequest.id,
     user: bloodRequest.createdBy
   });
 
@@ -185,7 +208,6 @@ exports.completeRequest = catchAsync(async (req, res, next) => {
 exports.replyToRequest = catchAsync(async (req, res, next) => {
   const { accept, notificationId } = req.body;
   const { id } = req.params;
-  const user = req.user;
 
   const bloodRequest = await BloodRequest.findById(id)
     .populate('createdBy')
@@ -200,29 +222,33 @@ exports.replyToRequest = catchAsync(async (req, res, next) => {
     await Notification.create({
       title: 'Donate Request Accepted',
       description: `your donate request for ${bloodRequest.patientName} has been accepted`,
+      notificationType: 'donation-accepted',
+      itemId: bloodRequest.id,
       user: bloodRequest.acceptedBy
     });
 
     await Notification.findByIdAndUpdate(notificationId, {
       description: `You have Accepted donation request from ${bloodRequest.acceptedBy.name}`,
       notificationType: 'donation-accepted',
-      data: bloodRequest.id
+      itemId: bloodRequest.id
     });
 
     await BloodRequest.findByIdAndUpdate(id, {
-      acceptedBy: user.id,
+      acceptedBy: bloodRequest.acceptedBy,
       status: 'accepted'
     });
   } else {
     await Notification.create({
       title: 'Donate Request Rejected',
       description: `your donate request for ${bloodRequest.patientName} has been rejected`,
+      notificationType: 'message',
       user: bloodRequest.acceptedBy
     });
 
     await Notification.findByIdAndUpdate(notificationId, {
       description: `You have rejected donation request from ${bloodRequest.acceptedBy.name}`,
-      notificationType: 'message'
+      notificationType: 'message',
+      profileId: bloodRequest.acceptedBy
     });
 
     await BloodRequest.findByIdAndUpdate(id, {
@@ -270,9 +296,81 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
     createdBy: user.id
   });
 
+  const searchRadiusInKilometres = 200 / 6378.1;
+  const limit = 50;
+
+  const nearbyUsers = await User.find({
+    _id: { $ne: user.id },
+    locationCoordinates: {
+      $geoWithin: {
+        $centerSphere: [coordinates, searchRadiusInKilometres]
+      }
+    }
+  })
+    .select('id name')
+    .limit(limit);
+
+  // TODO: Send Push Notification
+
+  await Promise.all(
+    nearbyUsers.map(user =>
+      Notification.create({
+        title: 'Nearby Blood Donation Request',
+        description: `${patientName} needs ${bloodType} Blood. Donate or Share to someone you know`,
+        notificationType: 'nearby-donation-request',
+        itemId: bloodRequest.id,
+        user: user._id
+      })
+    )
+  );
+
   res.status(200).json({
     success: true,
     data: { id: bloodRequest.id }
+  });
+});
+
+/**
+ * @route POST /api/blood-request/rate/:id
+ * @desc Let a user submit a rating for donator
+ * @secure true
+ */
+exports.createRating = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const user = req.user;
+  const { rating, review, notificationId } = req.body;
+
+  const bloodRequest = await BloodRequest.findById(id)
+    .populate('createdBy')
+    .populate('acceptedBy');
+
+  if (!bloodRequest) {
+    return next(new ErrorResponse('Blood request not found', 404));
+  }
+
+  await Rating.create({
+    rating,
+    review,
+    createdBy: user,
+    itemId: bloodRequest.id,
+    user: bloodRequest.acceptedBy
+  });
+
+  // TODO: Send Push Notification to User
+  await Notification.create({
+    title: `${bloodRequest.createdBy.name} Rated you ${rating} Stars.`,
+    description: `Rated for Donation for ${bloodRequest.patientName}.`,
+    notificationType: 'message',
+    user: bloodRequest.acceptedBy
+  });
+
+  await Notification.findByIdAndUpdate(notificationId, {
+    notificationType: 'message'
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Rating Submitted'
   });
 });
 
@@ -322,7 +420,7 @@ exports.updateBloodRequest = catchAsync(async (req, res, next) => {
  * @desc Delete a blood request
  * @secure true
  */
-exports.deleteRequest = catchAsync(async (req, res, next) => {
+exports.deleteBloodRequest = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const user = req.user;
   const bloodRequest = await BloodRequest.findById(id).populate('createdBy');

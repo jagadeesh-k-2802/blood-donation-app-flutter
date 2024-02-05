@@ -137,6 +137,35 @@ class BloodRequestService {
     }
   }
 
+  static Future<MessageResponse> sendRating({
+    required String id,
+    required double rating,
+    required String review,
+    required String notificationId,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/rate/$id';
+
+      var data = {
+        'rating': rating,
+        'review': review,
+        'notificationId': notificationId,
+      };
+
+      final response = await dio.post(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+
+      return MessageResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<CreateBloodRequestResponse> createBloodRequest({
     required String patientName,
     required String age,

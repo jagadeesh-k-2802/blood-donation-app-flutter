@@ -39,6 +39,8 @@ class App extends StatelessWidget {
         '/profile': (_) => const ProfileScreen(),
         '/change-password': (_) => const ChangePasswordScreen(),
         '/forgot-password': (_) => const ForgotPasswordScreen(),
+        '/public-profile': (_) => const PublicProfileScreen(),
+        '/reviews': (_) => const ReviewsScreen(),
       },
     );
   }

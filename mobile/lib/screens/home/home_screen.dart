@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String averageRating = '...';
   String totalDonated = '...';
   String totalRequested = '...';
 
@@ -35,8 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
     var res = await BloodRequestService.getBloodRequestStats();
 
     setState(() {
-      totalDonated = res.data.totalDonated.toString();
-      totalRequested = res.data.totalRequests.toString();
+      totalDonated = res.data.totalDonated;
+      totalRequested = res.data.totalRequests;
+      averageRating = res.data.averageRating;
     });
   }
 
@@ -49,16 +51,33 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.bloodtype,
             title: 'Blood Type',
             description: bloodType ?? '',
+            onTap: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+          ),
+          InfoCard(
+            icon: Icons.star,
+            title: 'Average Rating',
+            description: averageRating,
+            onTap: () {
+              Navigator.pushNamed(context, '/reviews');
+            },
           ),
           InfoCard(
             icon: Icons.medical_services_sharp,
             title: 'Times Donated',
             description: totalDonated,
+            onTap: () {
+              Navigator.pushNamed(context, '/dashboard');
+            },
           ),
           InfoCard(
             icon: Icons.local_hospital,
             title: 'Times Requested',
             description: totalRequested,
+            onTap: () {
+              Navigator.pushNamed(context, '/dashboard');
+            },
           ),
         ],
       ),

@@ -9,3 +9,5 @@ export '/screens/home/profile_screen.dart';
 export '/screens/home/request_blood_screen.dart';
 export '/screens/home/request_detail_screen.dart';
 export '/screens/home/request_edit_screen.dart';
+export '/screens/home/public_profile_screen.dart';
+export '/screens/home/reviews_screen.dart';

@@ -22,7 +22,8 @@ class GetAllNotificationResponseData {
   String title;
   String description;
   String notificationType;
-  String? data;
+  String? itemId;
+  String? profileId;
   DateTime createdAt;
 
   GetAllNotificationResponseData({
@@ -30,7 +31,8 @@ class GetAllNotificationResponseData {
     required this.title,
     required this.description,
     required this.notificationType,
-    required this.data,
+    required this.itemId,
+    required this.profileId,
     required this.createdAt,
   });
 
@@ -40,7 +42,8 @@ class GetAllNotificationResponseData {
       title: json['title'],
       description: json['description'],
       notificationType: json['notificationType'],
-      data: json['data'],
+      itemId: json['itemId'],
+      profileId: json['profileId'],
       createdAt: DateTime.parse(json['createdAt']),
     );
   }

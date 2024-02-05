@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const authControllers = require('../controllers/auth');
+const authController = require('../controllers/auth');
 const { protect } = require('../middlewares/auth');
 
-router.post('/login', authControllers.login);
-router.post('/register', authControllers.register);
-router.post('/update-details', protect, authControllers.updateDetails);
-router.post('/update-password', protect, authControllers.updatePassword);
-router.post('/update-avatar', protect, authControllers.updateAvatar);
-router.post('/forgot-password', authControllers.forgotPassword);
-router.post('/reset-password', authControllers.resetPassword);
-router.get('/me', authControllers.getCurrentUser);
-router.get('/logout', protect, authControllers.logout);
+router.post('/login', authController.login);
+router.post('/register', authController.register);
+router.post('/update-details', protect, authController.updateDetails);
+router.post('/update-password', protect, authController.updatePassword);
+router.post('/update-avatar', protect, authController.updateAvatar);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+router.get('/me', authController.getCurrentUser);
+router.get('/logout', protect, authController.logout);
 
 module.exports = router;
