@@ -16,7 +16,8 @@ const BloodRequest = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'pending', 'accepted']
+      default: 'active',
+      enum: ['active', 'pending', 'accepted', 'completed']
     },
     location: {
       type: String,

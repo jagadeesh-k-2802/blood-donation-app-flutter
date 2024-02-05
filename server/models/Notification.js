@@ -13,7 +13,15 @@ const Notification = new mongoose.Schema(
     },
     read: {
       type: Boolean,
-      default: false,
+      default: false
+    },
+    notificationType: {
+      type: String,
+      enum: ['message', 'donation-request', 'donation-accepted'],
+      default: 'message'
+    },
+    data: {
+      type: String
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now }

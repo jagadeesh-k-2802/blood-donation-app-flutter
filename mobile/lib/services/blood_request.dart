@@ -78,6 +78,65 @@ class BloodRequestService {
     }
   }
 
+  static Future<MessageResponse> sendDonateRequest({
+    required String id,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/donate/$id';
+      final response = await dio.get(url);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+      return MessageResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> replyToDonateRequest({
+    required String id,
+    required String notificationId,
+    required bool accept,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/reply/$id';
+      var data = {'accept': accept, 'notificationId': notificationId};
+      final response = await dio.put(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+      return MessageResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> markRequestCompleted({
+    required String id,
+    required List<double> coordinates,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/complete/$id';
+      var data = {'coordinates': coordinates};
+      final response = await dio.put(url, data: data);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+      return MessageResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future<CreateBloodRequestResponse> createBloodRequest({
     required String patientName,
     required String age,
@@ -155,6 +214,24 @@ class BloodRequestService {
 
       var messageResponse = MessageResponse.fromJson(response.data);
       return messageResponse;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<MessageResponse> deleteRequest({
+    required String id,
+  }) async {
+    try {
+      final dio = await getDioClient();
+      String url = '$apiUrl/api/v1/blood-request/$id';
+      final response = await dio.delete(url);
+
+      if (response.statusCode != 200) {
+        var errorResponse = ErrorResponse.fromJson(response.data);
+        throw errorResponse.error;
+      }
+      return MessageResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

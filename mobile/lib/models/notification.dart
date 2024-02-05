@@ -18,20 +18,29 @@ class GetAllNotificationResponse {
 }
 
 class GetAllNotificationResponseData {
+  String id;
   String title;
   String description;
+  String notificationType;
+  String? data;
   DateTime createdAt;
 
   GetAllNotificationResponseData({
+    required this.id,
     required this.title,
     required this.description,
+    required this.notificationType,
+    required this.data,
     required this.createdAt,
   });
 
   factory GetAllNotificationResponseData.fromJson(Map<String, dynamic> json) {
     return GetAllNotificationResponseData(
+      id: json['_id'],
       title: json['title'],
       description: json['description'],
+      notificationType: json['notificationType'],
+      data: json['data'],
       createdAt: DateTime.parse(json['createdAt']),
     );
   }

@@ -1,13 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:blood_donation/models/auth.dart';
 import 'package:blood_donation/provider/global_state.dart';
 import 'package:blood_donation/screens/home/request_detail_screen.dart';
 import 'package:blood_donation/services/blood_request.dart';
 import 'package:blood_donation/utils/functions.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:blood_donation/models/blood_request.dart';
 import 'package:blood_donation/widgets/bottom_nav_bar.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 typedef BloodRequestItem = GetAllBloodRequestResponseData;
 typedef PagingData = PagingController<int, BloodRequestItem>;
@@ -63,8 +63,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'active':
         return Colors.red;
       case 'pending':
-        return Colors.yellow;
+        return Colors.orange;
       case 'accepted':
+      case 'completed':
         return Colors.green;
       default:
         return Colors.red;
@@ -87,12 +88,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      onTap: () {
-        Navigator.pushNamed(
+      onTap: () async {
+        await Navigator.pushNamed(
           context,
           '/request-detail',
           arguments: RequestDetailScreenArgs(id: item.id),
         );
+
+        pagingController.refresh();
       },
     );
   }

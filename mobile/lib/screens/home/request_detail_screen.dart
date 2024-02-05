@@ -1,3 +1,4 @@
+import 'package:blood_donation/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:blood_donation/constants/constants.dart';
 import 'package:blood_donation/models/auth.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RequestDetailScreenArgs {
   final String id;
@@ -27,6 +29,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   GetBloodRequestResponseData? data;
   bool loading = true;
   bool error = false;
+  bool requestProcessing = false;
 
   @override
   void initState() {
@@ -64,12 +67,75 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     await fetchData();
   }
 
+  Future<void> markRequestAsCompleted() async {
+    setState(() => requestProcessing = true);
+
+    try {
+      var location = await getCurrentLocation(context);
+
+      var coordinates = [
+        location?.$1.latitude ?? 0,
+        location?.$1.longitude ?? 0,
+      ];
+
+      await BloodRequestService.markRequestCompleted(
+        id: data?.id ?? '',
+        coordinates: coordinates,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Completed Succesfully')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      setState(() => requestProcessing = false);
+      await fetchData();
+    }
+  }
+
   Future<void> sendDonateRequest() async {
-    // TODO: sendDonateRequest
+    try {
+      await BloodRequestService.sendDonateRequest(id: data?.id ?? '');
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Donate Request Sent')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      await fetchData();
+    }
   }
 
   Future<void> deleteBloodRequest() async {
-    // TODO: deleteBloodRequest
+    try {
+      await BloodRequestService.deleteRequest(id: data?.id ?? '');
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request Deleted Sucessfully')),
+      );
+
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 
   Widget buildLoadingWidget() {
@@ -103,6 +169,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
   Widget buildDetailWidget() {
     UserResponseData? user = context.read<GlobalState>().user;
     bool isOwner = user?.id == data?.createdBy.id;
+    bool isDonator = user?.id == data?.acceptedBy?.id;
+    bool isDonationAccepted = isDonator && data?.status == 'accepted';
+    bool isDonationCompleted = isDonator && data?.status == 'completed';
     TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -135,8 +204,41 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             const SizedBox(width: 12.0),
           ],
         ),
-        const SizedBox(height: 32.0),
-        // TODO: Show Contact Number only when accepted
+        const SizedBox(height: 16.0),
+        Visibility(
+          visible: isDonationCompleted,
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    'Message: You have completed this donation. Thanks for your co-operation',
+                    style: textTheme.bodyLarge,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        ),
+        Visibility(
+          visible: isDonationAccepted,
+          child: Column(
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    'Message: Your request has been accepted, contact them by tapping the contact number and kindly be as soon as possible. Tap \'Completed\' after your donation has been completed right in the hospital. Thank You',
+                    style: textTheme.bodyLarge,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        ),
         Text(
           'Patient Name: ${data?.patientName}',
           style: textTheme.bodyLarge,
@@ -157,6 +259,16 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           'Location: ${data?.location}',
           style: textTheme.bodyLarge,
         ),
+        Visibility(
+          visible: isDonationAccepted,
+          child: GestureDetector(
+            onTap: () async {
+              await launchUrl(Uri.parse('tel:${data?.contactNumber}'));
+            },
+            child: Text('Contact Number: ${data?.contactNumber}',
+                style: textTheme.bodyLarge),
+          ),
+        ),
         Text(
           'Notes: ${data?.notes?.isEmpty == true ? '--' : data?.notes}',
           style: textTheme.bodyLarge,
@@ -174,7 +286,6 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
               initialZoom: 15,
             ),
             children: [
-              // TODO: Open Google Maps with Coordinates
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'dev.fleaflet.flutter_map.example',
@@ -189,11 +300,19 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     ),
                     width: 48,
                     height: 48,
-                    alignment: Alignment.centerLeft,
-                    child: const Icon(
-                      Icons.location_pin,
-                      color: primaryColor,
-                      size: 48,
+                    alignment: Alignment.bottomCenter,
+                    child: IconButton(
+                      onPressed: () async {
+                        String url = 'https://maps.google.com/maps?q=';
+                        url += '${data?.locationCoordinates[1]},';
+                        url += '${data?.locationCoordinates[0]}';
+                        await launchUrl(Uri.parse(url));
+                      },
+                      icon: const Icon(
+                        Icons.location_on,
+                        size: 48,
+                        color: primaryColor,
+                      ),
                     ),
                   ),
                 ],
@@ -203,11 +322,25 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         ),
         const SizedBox(height: 12),
         Visibility(
-          visible: !isOwner,
+          visible: !isOwner && !isDonationAccepted,
           child: ElevatedButton.icon(
-            onPressed: sendDonateRequest,
-            icon: const Icon(Icons.bloodtype),
-            label: const Text('Send Donate Request'),
+            onPressed: isDonator ? null : sendDonateRequest,
+            icon: Icon(
+              isDonator ? Icons.done : Icons.bloodtype,
+            ),
+            label: Text(
+              isDonator ? 'Donate Request Sent' : 'Send Donate Request',
+            ),
+          ),
+        ),
+        Visibility(
+          visible: isDonationAccepted,
+          child: ElevatedButton.icon(
+            onPressed: requestProcessing ? null : markRequestAsCompleted,
+            icon: const Icon(Icons.done),
+            label: Text(
+              requestProcessing ? 'Please Wait...' : 'Mark as Completed',
+            ),
           ),
         ),
         Visibility(
@@ -218,6 +351,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             label: const Text('Delete Blood Request'),
           ),
         ),
+        const SizedBox(height: 64)
       ],
     );
   }
@@ -251,9 +385,18 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
               ),
               child: Column(
                 children: [
-                  Visibility(visible: loading, child: buildLoadingWidget()),
-                  Visibility(visible: error, child: buildErrorWidget()),
-                  Visibility(visible: data != null, child: buildDetailWidget()),
+                  Visibility(
+                    visible: loading && !error && data == null,
+                    child: buildLoadingWidget(),
+                  ),
+                  Visibility(
+                    visible: error && !loading,
+                    child: buildErrorWidget(),
+                  ),
+                  Visibility(
+                    visible: data != null && !loading,
+                    child: buildDetailWidget(),
+                  ),
                 ],
               ),
             ),
