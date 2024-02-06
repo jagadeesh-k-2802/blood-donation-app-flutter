@@ -1,8 +1,8 @@
-# Blood Donation App
+# Blood Donation App 🩸
 
 Blood Donation Mobile Application built with Flutter, Node.js, Express.js, MongoDB
 
-## Features
+## Features 📲
 
 - Login/Register Accounts, Forgot Password Feature
 - Edit Profile Data with User Uploadable Profile Picture
@@ -13,7 +13,7 @@ Blood Donation Mobile Application built with Flutter, Node.js, Express.js, Mongo
 - Rating System allows to rate and write a review for Donor
 - Push Notifications using Firebase
 
-## Running The Application
+## Running The Application 🧑🏻‍💻
 
 - `git clone https://github.com/jagadeesh-k-2802/blood-donation-app-flutter`
 - `cd server && npm i`
@@ -28,13 +28,13 @@ Blood Donation Mobile Application built with Flutter, Node.js, Express.js, Mongo
 - `cd mobile && flutterfire configure` Configure firebase using your own firebase project
 - open `./mobile` inside your code editor and run flutter app
 
-## Database Seeding
+## Database Seeding 🌱
 
 - `cd server`
 - `node db-seed.js --seed` This command populates the db with few sample data to get started
 - `node db-seed.js --clean` This command will delete everything stored in the database
 
-## Screenshots
+## Screenshots 📷
 
 <img src="https://github.com/jagadeesh-k-2802/blood-donation-app-flutter/assets/63912668/02ca044d-649a-41a3-87c9-f875969068ec" width="250" />
 <img src="https://github.com/jagadeesh-k-2802/blood-donation-app-flutter/assets/63912668/e8e9ac2c-58bb-49b1-b2f0-35cf7e96d3bd" width="250" />
@@ -51,6 +51,6 @@ Blood Donation Mobile Application built with Flutter, Node.js, Express.js, Mongo
 <img src="https://github.com/jagadeesh-k-2802/blood-donation-app-flutter/assets/63912668/fc2a613f-0193-4490-993c-0dee1e377bf1" width="250" />
 <br />
 
-## Screen Record
+## Screen Record 📷
 
 https://github.com/jagadeesh-k-2802/blood-donation-app-flutter/assets/63912668/422de109-03c5-4a3a-9d7b-26c8f0cda465
