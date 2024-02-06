@@ -8,8 +8,8 @@ Blood Donation Mobile Application built with Flutter, Node.js, Express.js, Mongo
 - Edit Profile Data with User Uploadable Profile Picture
 - Get Blood Request Alerts Around 200 Km Radius Nearby
 - Request When Blood is Needed / Donate to Others
-- Donation will be Completed only if Donator is Within Hospital Radius By Verifying GPS Coordinates
-- Blood Requestor can Accept/Reject a Donor & Personal Details are Shared only if Accepted
+- Donation will be Accepted only if Donor is Within Hospital Radius By Verifying GPS Coordinates
+- Users can Accept/Reject a Donor & Personal Details are Shared only if Accepted
 - Rating System allows to rate and write a review for Donor
 - Push Notifications using Firebase
 
@@ -51,5 +51,6 @@ Blood Donation Mobile Application built with Flutter, Node.js, Express.js, Mongo
 <img src="https://github.com/jagadeesh-k-2802/blood-donation-app-flutter/assets/63912668/b4904f2b-e024-4c7e-8d78-d13d179de511" width="250" />
 <br />
 
+## Screen Record
 
-
+https://github.com/jagadeesh-k-2802/blood-donation-app-flutter/assets/63912668/422de109-03c5-4a3a-9d7b-26c8f0cda465
