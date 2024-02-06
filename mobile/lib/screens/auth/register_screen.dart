@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:blood_donation/services/auth.dart';
 import 'package:blood_donation/utils/functions.dart';
 import 'package:blood_donation/theme/theme.dart';
@@ -33,6 +34,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     try {
+      final fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+
       await AuthService.register(
         name: nameController.text,
         email: emailController.text,
@@ -41,6 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         bloodType: selectedBloodType,
         address: addressController.text,
         coordinates: coordinates,
+        fcmToken: fcmToken,
       );
 
       if (mounted) {

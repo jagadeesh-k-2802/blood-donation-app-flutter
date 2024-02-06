@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const Rating = require('../models/Rating');
 const catchAsync = require('../utils/catchAsync');
+const sendPushNotification = require('../utils/sendPushNotification');
 const ErrorResponse = require('../utils/errorResponse');
 
 /**
@@ -141,11 +142,16 @@ exports.donateRequest = catchAsync(async (req, res, next) => {
     user: bloodRequest.createdBy
   });
 
-  // TODO: Send Push Notificaton to User about New Request
+  await sendPushNotification({
+    title: 'New Donate Request',
+    body: `${user.name} has accepted to donate for ${bloodRequest.patientName}`,
+    tokens: [bloodRequest.createdBy.fcmToken]
+  });
 
-  res
-    .status(200)
-    .json({ success: true, message: 'Donate request sent sucessfully' });
+  res.status(200).json({
+    success: true,
+    message: 'Donate request sent sucessfully'
+  });
 });
 
 /**
@@ -182,14 +188,18 @@ exports.completeRequest = catchAsync(async (req, res, next) => {
     );
   }
 
-  // TODO: Send Push Notification
-
   await Notification.create({
     title: 'Donation Completed Successfully',
     notificationType: 'donation-completed',
     description: `your request for ${bloodRequest.patientName} has been sucessfully served by ${user.name}`,
     itemId: bloodRequest.id,
     user: bloodRequest.createdBy
+  });
+
+  await sendPushNotification({
+    title: 'Donation Completed Successfully',
+    body: `your request for ${bloodRequest.patientName} has been sucessfully served by ${user.name}`,
+    tokens: [bloodRequest.createdBy.fcmToken]
   });
 
   await BloodRequest.findByIdAndUpdate(id, { status: 'completed' });
@@ -217,7 +227,6 @@ exports.replyToRequest = catchAsync(async (req, res, next) => {
     return next(new ErrorResponse('Blood request not found', 404));
   }
 
-  // TODO: Send Push Notificaton to User about Request Accept/Reject
   if (accept) {
     await Notification.create({
       title: 'Donate Request Accepted',
@@ -225,6 +234,12 @@ exports.replyToRequest = catchAsync(async (req, res, next) => {
       notificationType: 'donation-accepted',
       itemId: bloodRequest.id,
       user: bloodRequest.acceptedBy
+    });
+
+    await sendPushNotification({
+      title: 'Donate Request Accepted',
+      body: `your donate request for ${bloodRequest.patientName} has been accepted`,
+      tokens: [bloodRequest.acceptedBy.fcmToken]
     });
 
     await Notification.findByIdAndUpdate(notificationId, {
@@ -243,6 +258,12 @@ exports.replyToRequest = catchAsync(async (req, res, next) => {
       description: `your donate request for ${bloodRequest.patientName} has been rejected`,
       notificationType: 'message',
       user: bloodRequest.acceptedBy
+    });
+
+    await sendPushNotification({
+      title: 'Donate Request Rejected',
+      body: `your donate request for ${bloodRequest.patientName} has been rejected`,
+      tokens: [bloodRequest.acceptedBy.fcmToken]
     });
 
     await Notification.findByIdAndUpdate(notificationId, {
@@ -297,7 +318,7 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
   });
 
   const searchRadiusInKilometres = 200 / 6378.1;
-  const limit = 50;
+  const limit = 100;
 
   const nearbyUsers = await User.find({
     _id: { $ne: user.id },
@@ -307,10 +328,14 @@ exports.createBloodRequest = catchAsync(async (req, res, next) => {
       }
     }
   })
-    .select('id name')
+    .select('id name fcmToken')
     .limit(limit);
 
-  // TODO: Send Push Notification
+  await sendPushNotification({
+    title: 'Nearby Blood Donation Request',
+    body: `${patientName} needs ${bloodType} Blood. Donate or Share to someone you know`,
+    tokens: nearbyUsers.map(user => user?.fcmToken)
+  });
 
   await Promise.all(
     nearbyUsers.map(user =>
@@ -356,7 +381,12 @@ exports.createRating = catchAsync(async (req, res, next) => {
     user: bloodRequest.acceptedBy
   });
 
-  // TODO: Send Push Notification to User
+  await sendPushNotification({
+    title: `${bloodRequest.createdBy.name} Rated you ${rating} Stars.`,
+    body: `Rated for Donation for ${bloodRequest.patientName}.`,
+    tokens: [bloodRequest.acceptedBy.fcmToken]
+  });
+
   await Notification.create({
     title: `${bloodRequest.createdBy.name} Rated you ${rating} Stars.`,
     description: `Rated for Donation for ${bloodRequest.patientName}.`,

@@ -15,7 +15,7 @@ const { bytesToMB } = require('../utils/functions');
  * @secure false
  */
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, fcmToken } = req.body;
 
   // Validate email & password
   if (!email || !password) {
@@ -36,6 +36,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new ErrorResponse('Invalid Email Or Password', 401));
   }
 
+  await User.findByIdAndUpdate(user.id, { fcmToken });
   sendTokenResponse(user, 200, res);
 });
 
@@ -45,24 +46,59 @@ exports.login = catchAsync(async (req, res, next) => {
  * @secure false
  */
 exports.register = catchAsync(async (req, res) => {
-  const avatar = `default-avatar.jpg`;
+  const {
+    name,
+    avatar = 'default-avatar.jpg',
+    email,
+    phone,
+    bloodType,
+    address,
+    coordinates,
+    fcmToken
+  } = req.body;
 
   const user = await User.create({
-    name: req.body.name,
+    name: name,
     avatar,
-    email: req.body.email,
-    phone: req.body.phone,
-    address: req.body.address,
+    email: email,
+    phone: phone,
+    address: address,
     locationCoordinates: {
       type: 'Point',
-      coordinates: req.body.coordinates.reverse()
+      coordinates: coordinates.reverse()
     },
-    bloodType: req.body.bloodType,
-    password: req.body.password
+    fcmToken: fcmToken,
+    bloodType: bloodType,
+    password: password
   });
 
   await new Email(user, {}).sendWelcome();
   sendTokenResponse(user, 200, res);
+});
+
+/**
+ * @route GET /api/auth/logout
+ * @desc Returns the current user
+ * @secure false
+ */
+exports.getCurrentUser = catchAsync(async (req, res, next) => {
+  await isAuthenticated(req); // Injects req.user
+  res.status(200).json({ success: true, data: req.user });
+});
+
+/**
+ * @route GET /api/auth/logout
+ * @desc let the user logout
+ * @secure true
+ */
+exports.logout = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  await User.findByIdAndUpdate(user.id, { fcmToken: null });
+
+  res.status(200).json({
+    success: true,
+    message: 'Logout Sucessful'
+  });
 });
 
 /**
@@ -249,25 +285,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     success: true,
     message: 'Password has been changed, Use your new password to login'
   });
-});
-
-/**
- * @route GET /api/auth/logout
- * @desc Returns the current user
- * @secure false
- */
-exports.getCurrentUser = catchAsync(async (req, res, next) => {
-  await isAuthenticated(req); // Injects req.user
-  res.status(200).json({ success: true, data: req.user });
-});
-
-/**
- * @route GET /api/auth/logout
- * @desc let the user logout
- * @secure true
- */
-exports.logout = catchAsync(async (req, res, next) => {
-  res.status(200).json({ success: true, message: 'Logout Sucessful' });
 });
 
 // Creates a JWT Token and returns it

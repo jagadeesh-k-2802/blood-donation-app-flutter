@@ -44,6 +44,7 @@ class UserResponseData {
   String phone;
   String address;
   String bloodType;
+  String fcmToken;
   String createdAt;
 
   UserResponseData({
@@ -53,6 +54,7 @@ class UserResponseData {
     required this.email,
     required this.phone,
     required this.bloodType,
+    required this.fcmToken,
     required this.address,
     required this.createdAt,
   });
@@ -65,6 +67,7 @@ class UserResponseData {
       email: json['email'],
       phone: json['phone'],
       bloodType: json['bloodType'],
+      fcmToken: json['fcmToken'],
       address: json['address'],
       createdAt: json['createdAt'],
     );

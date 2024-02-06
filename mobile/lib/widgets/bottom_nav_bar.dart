@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:blood_donation/services/notification.dart';
 import 'package:blood_donation/theme/theme.dart';
-import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int currentIndex;
@@ -43,42 +43,28 @@ class _BottomNavBarState extends State<BottomNavBar> {
       return;
     }
 
+    String? route;
+
     switch (index) {
       case 0:
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (_) => false,
-        );
+        route = '/home';
         break;
       case 1:
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/dashboard',
-          (_) => false,
-        );
+        route = '/dashboard';
         break;
       case 2:
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/request-blood',
-          (_) => false,
-        );
+        route = '/request-blood';
         break;
       case 3:
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/notifications',
-          (_) => false,
-        );
+        route = '/notifications';
         break;
       case 4:
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/profile',
-          (_) => false,
-        );
+        route = '/profile';
         break;
+    }
+
+    if (route != null) {
+      Navigator.pushNamedAndRemoveUntil(context, route, (_) => false);
     }
   }
 

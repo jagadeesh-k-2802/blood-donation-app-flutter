@@ -1,9 +1,9 @@
-import 'package:blood_donation/constants/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:blood_donation/models/user.dart';
 import 'package:blood_donation/services/user.dart';
 import 'package:blood_donation/theme/theme.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:blood_donation/constants/constants.dart';
 
 class PublicProfileScreenArgs {
   final String id;

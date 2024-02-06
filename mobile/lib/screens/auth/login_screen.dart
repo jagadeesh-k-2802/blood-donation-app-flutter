@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:blood_donation/services/auth.dart';
 import 'package:blood_donation/utils/functions.dart';
 import 'package:blood_donation/theme/theme.dart';
@@ -18,9 +19,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> sendLoginRequest() async {
     try {
+      final fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+
       await AuthService.login(
         email: emailController.text,
         password: passwordController.text,
+        fcmToken: fcmToken,
       );
 
       if (mounted) {

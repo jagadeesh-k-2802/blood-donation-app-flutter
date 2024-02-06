@@ -48,6 +48,9 @@ const User = new mongoose.Schema(
         index: '2dsphere'
       }
     },
+    fcmToken: {
+      type: String
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     createdAt: { type: Date, default: Date.now }

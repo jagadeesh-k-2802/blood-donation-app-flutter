@@ -9,11 +9,12 @@ class AuthService {
   static Future<TokenResponse> login({
     required String email,
     required String password,
+    required String fcmToken,
   }) async {
     try {
       final dio = await getDioClient();
       const url = '$apiUrl/api/v1/auth/login';
-      var data = {'email': email, 'password': password};
+      var data = {'email': email, 'password': password, 'fcmToken': fcmToken};
 
       final response = await dio.post(url, data: data);
 
@@ -39,6 +40,7 @@ class AuthService {
     required List<double> coordinates,
     required String bloodType,
     required String phone,
+    required String fcmToken,
   }) async {
     try {
       final dio = await getDioClient();
@@ -52,6 +54,7 @@ class AuthService {
         'address': address,
         'coordinates': coordinates,
         'password': password,
+        'fcmToken': fcmToken,
       };
 
       final response = await dio.post(url, data: data);

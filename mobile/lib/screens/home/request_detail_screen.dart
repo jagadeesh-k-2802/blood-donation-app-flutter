@@ -1,3 +1,4 @@
+import 'package:blood_donation/widgets/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
@@ -224,14 +225,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     ),
                   );
                 },
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      'Message: Your request has been succesfully served by ${data?.acceptedBy?.name}',
-                      style: textTheme.bodyLarge,
-                    ),
-                  ),
+                child: AlertInfo(
+                  message:
+                      'Your request has been succesfully served by ${data?.acceptedBy?.name}',
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -240,18 +236,13 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         ),
         Visibility(
           visible: isDonationCompleted,
-          child: Column(
+          child: const Column(
             children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    'Message: You have completed this donation. Thanks for your co-operation',
-                    style: textTheme.bodyLarge,
-                  ),
-                ),
+              AlertInfo(
+                message:
+                    'You have completed this donation. Thanks for your co-operation',
               ),
-              const SizedBox(height: 16.0),
+              SizedBox(height: 16.0),
             ],
           ),
         ),
@@ -269,14 +260,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     ),
                   );
                 },
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      'Message: Your request has been accepted by Jagadeesh. contact them by tapping this message.',
-                      style: textTheme.bodyLarge,
-                    ),
-                  ),
+                child: AlertInfo(
+                  message:
+                      'Your request has been accepted by ${data?.acceptedBy?.name}. contact them by tapping this message.',
                 ),
               ),
               const SizedBox(height: 16.0),
@@ -285,18 +271,13 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
         ),
         Visibility(
           visible: isDonationAccepted && !isOwner,
-          child: Column(
+          child: const Column(
             children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    'Message: Your request has been accepted, contact them by tapping the contact number and kindly be as soon as possible. Tap \'Completed\' after your donation has been completed right in the hospital. Thank You',
-                    style: textTheme.bodyLarge,
-                  ),
-                ),
+              AlertInfo(
+                message:
+                    'Your request has been accepted, contact them by tapping the contact number and kindly be as soon as possible. Tap \'Completed\' after your donation has been completed right in the hospital. Thank You',
               ),
-              const SizedBox(height: 16.0),
+              SizedBox(height: 16.0),
             ],
           ),
         ),
