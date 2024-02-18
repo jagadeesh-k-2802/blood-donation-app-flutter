@@ -34,4 +34,8 @@ ThemeData bloodDonationAppTheme = ThemeData(
       ),
     ),
   ),
+  sliderTheme: SliderThemeData(
+    showValueIndicator: ShowValueIndicator.always,
+    overlayShape: SliderComponentShape.noOverlay,
+  ),
 );

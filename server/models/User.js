@@ -11,7 +11,10 @@ const User = new mongoose.Schema(
       required: [true, 'Name is required'],
       maxlength: [20, 'Name should not exceed 16 characters']
     },
-    avatar: String,
+    avatar: {
+      type: String,
+      default: 'default-avatar.jpg'
+    },
     email: {
       type: String,
       required: [true, 'Please add an Email'],

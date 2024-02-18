@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:moment_dart/moment_dart.dart';
 import 'package:blood_donation/screens/home/request_detail_screen.dart';
 import 'package:blood_donation/services/blood_request.dart';
-import 'package:blood_donation/widgets/bottom_nav_bar.dart';
 import 'package:blood_donation/constants/constants.dart';
 import 'package:blood_donation/theme/theme.dart';
 import 'package:blood_donation/utils/functions.dart';
@@ -110,7 +109,6 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         title: const Text('Request Blood'),
         automaticallyImplyLeading: false,
       ),
-      bottomNavigationBar: const BottomNavBar(currentIndex: 2),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

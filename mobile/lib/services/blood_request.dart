@@ -46,11 +46,17 @@ class BloodRequestService {
     }
   }
 
-  static Future<GetNearbyBloodRequestResponse> getNearbyBloodRequests() async {
+  static Future<GetNearbyBloodRequestResponse> getNearbyBloodRequests({
+    required int requestRadius,
+  }) async {
     try {
       final dio = await getDioClient();
       const url = '$apiUrl/api/v1/blood-request/nearby';
-      final response = await dio.get(url);
+
+      final response = await dio.get(
+        url,
+        queryParameters: {'requestRadius': requestRadius},
+      );
 
       if (response.statusCode != 200) {
         var errorResponse = ErrorResponse.fromJson(response.data);

@@ -1,3 +1,4 @@
+import 'package:blood_donation/constants/constants.dart';
 import 'package:blood_donation/models/auth.dart';
 import 'package:blood_donation/provider/global_state.dart';
 import 'package:flutter/material.dart';
@@ -44,26 +45,41 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   Widget buildReviewItem(ProfileReviewData? reviewData) {
     TextTheme textTheme = Theme.of(context).textTheme;
 
-    return ListTile(
-      title: Text('${reviewData?.createdBy.name} Says'),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(reviewData?.review ?? ''),
-          const SizedBox(height: 8.0),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                reviewData?.rating.toString() ?? '',
-                style: textTheme.bodyLarge,
-              ),
-              const SizedBox(width: 5.0),
-              const Icon(Icons.star),
-            ],
+    return Row(
+      children: [
+        SizedBox(
+          height: 65,
+          width: 65,
+          child: CircleAvatar(
+            radius: 100,
+            child: ClipOval(
+              child: Image.network('$apiUrl/avatar/${data?.avatar}'),
+            ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 16),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${reviewData?.createdBy.name} Says',
+              style: textTheme.bodyLarge,
+            ),
+            Text(reviewData?.review ?? ''),
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                Text(
+                  reviewData?.rating.toString() ?? '',
+                  style: textTheme.labelLarge,
+                ),
+                const SizedBox(width: 5.0),
+                const Icon(Icons.star),
+              ],
+            ),
+          ],
+        )
+      ],
     );
   }
 
@@ -101,14 +117,30 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   Widget buildDetailWidget() {
+    TextTheme textTheme = Theme.of(context).textTheme;
+
+    if (data?.reviews.isEmpty == true) {
+      return Center(
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline, size: 64),
+            const SizedBox(height: 8.0),
+            Text(
+              'Currently there are no reviews',
+              style: textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12.0),
+          ],
+        ),
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       itemCount: data?.reviews.length ?? 0,
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
       itemBuilder: (context, index) {
         return buildReviewItem(data?.reviews[index]);
-      },
-      separatorBuilder: (context, index) {
-        return const Divider();
       },
     );
   }
@@ -116,7 +148,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Reviews')),
+      appBar: AppBar(title: const Text('Reviews Received')),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => await fetchData(),

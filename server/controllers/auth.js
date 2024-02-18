@@ -50,6 +50,7 @@ exports.register = catchAsync(async (req, res) => {
     name,
     avatar = 'default-avatar.jpg',
     email,
+    password,
     phone,
     bloodType,
     address,

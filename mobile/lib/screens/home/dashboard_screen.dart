@@ -7,7 +7,6 @@ import 'package:blood_donation/screens/home/request_detail_screen.dart';
 import 'package:blood_donation/services/blood_request.dart';
 import 'package:blood_donation/utils/functions.dart';
 import 'package:blood_donation/models/blood_request.dart';
-import 'package:blood_donation/widgets/bottom_nav_bar.dart';
 
 typedef BloodRequestItem = GetAllBloodRequestResponseData;
 typedef PagingData = PagingController<int, BloodRequestItem>;
@@ -119,7 +118,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        bottomNavigationBar: const BottomNavBar(currentIndex: 1),
         body: SafeArea(
           child: TabBarView(
             children: <Widget>[

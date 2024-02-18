@@ -51,8 +51,9 @@ exports.getBloodRequest = catchAsync(async (req, res, next) => {
  */
 exports.getBloodRequestsNearby = catchAsync(async (req, res, next) => {
   const user = req.user;
+  const requestRadius = req.query.requestRadius || 200;
   const userCoordinates = user.locationCoordinates.coordinates;
-  const searchRadiusInKilometres = 200 / 6378.1;
+  const searchRadiusInKilometres = requestRadius / 6378.1;
   const limit = 50;
 
   const bloodRequests = await BloodRequest.find({

@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:moment_dart/moment_dart.dart';
-import 'package:blood_donation/screens/home/public_profile_screen.dart';
+import 'package:blood_donation/screens/profile/public_profile_screen.dart';
 import 'package:blood_donation/screens/home/request_detail_screen.dart';
 import 'package:blood_donation/services/blood_request.dart';
 import 'package:blood_donation/models/notification.dart';
 import 'package:blood_donation/services/notification.dart';
-import 'package:blood_donation/widgets/bottom_nav_bar.dart';
 
 typedef NotificationItem = GetAllNotificationResponseData;
 typedef PagingData = PagingController<int, NotificationItem>;
@@ -314,7 +313,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         title: const Text('Notifications'),
         automaticallyImplyLeading: false,
       ),
-      bottomNavigationBar: const BottomNavBar(currentIndex: 3),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => Future.sync(
