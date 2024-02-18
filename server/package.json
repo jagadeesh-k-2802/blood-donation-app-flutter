@@ -8,7 +8,7 @@
     "dev": "nodemon server.js"
   },
   "keywords": [],
-  "author": "Jack",
+  "author": "Jagadeesh",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
